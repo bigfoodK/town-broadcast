@@ -1,0 +1,33 @@
+{
+  "name": "town-broadcast-server-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "node .",
+    "start-watch": "nodemon .",
+    "build": "tsc",
+    "build-watch": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigfoodK/town-broadcast-server-test.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bigfoodK/town-broadcast-server-test/issues"
+  },
+  "homepage": "https://github.com/bigfoodK/town-broadcast-server-test#readme",
+  "dependencies": {
+    "@types/koa": "^2.0.48",
+    "@types/koa-router": "^7.0.40",
+    "koa": "^2.7.0",
+    "koa-router": "^7.4.0",
+    "typescript": "^3.3.3333"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
+  }
+}
