@@ -23,9 +23,12 @@
   "dependencies": {
     "@types/koa": "^2.0.48",
     "@types/koa-router": "^7.0.40",
+    "@types/ws": "^6.0.1",
     "koa": "^2.7.0",
     "koa-router": "^7.4.0",
-    "typescript": "^3.3.3333"
+    "speaker": "^0.4.1",
+    "typescript": "^3.3.3333",
+    "ws": "^6.2.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"

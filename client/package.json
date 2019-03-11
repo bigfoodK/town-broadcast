@@ -7,6 +7,7 @@
     "@types/node": "11.11.0",
     "@types/react": "16.8.7",
     "@types/react-dom": "16.8.2",
+    "audio-context": "^1.0.3",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8",
