@@ -1,15 +1,20 @@
+import Fs from 'fs';
 import Koa from 'koa';
 import Http from 'http';
+import Https from 'https';
 import WebSocket from 'ws';
 import Speaker from 'speaker';
 import Router from './router';
+import redirectHttps from './redirectHttps';
 
-const app = new Koa();
-app.use(Router.routes());
+const httpServer = Http.createServer();
 
-const server = Http.createServer();
+const httpsServer = Https.createServer({
+  key: Fs.readFileSync('./key/key.pem'),
+  cert: Fs.readFileSync('./key/cert.pem'),
+});
 
-const webSocketServer = new WebSocket.Server({ server });
+const webSocketServer = new WebSocket.Server({ server: httpsServer });
 webSocketServer.on('connection', ws => {
   const speaker = new Speaker({
     bitDepth: 16,
@@ -23,5 +28,11 @@ webSocketServer.on('connection', ws => {
   console.log('connected');
 });
 
-server.on('request', app.callback());
-server.listen(3000);
+const app = new Koa();
+app.use(redirectHttps);
+app.use(Router.routes());
+
+httpServer.on('request', app.callback());
+httpServer.listen(3000);
+httpsServer.on('request', app.callback());
+httpsServer.listen(3001);

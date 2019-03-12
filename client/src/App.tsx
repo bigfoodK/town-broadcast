@@ -35,7 +35,7 @@ class App extends Component<any, State> {
   makeConnection() {
     if(this.socket && this.socket.readyState !== 3) return;
 
-    this.socket = new WebSocket('ws://localhost:3000');
+    this.socket = new WebSocket('wss://localhost:3001');
     this.socket.onerror = error => {
       console.error(error);
     }

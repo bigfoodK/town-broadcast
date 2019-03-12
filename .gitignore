@@ -63,3 +63,6 @@ typings/
 # distribute
 client/build/
 server/dist/
+
+# ssl key
+server/key/*
