@@ -82,7 +82,7 @@ class App extends Component<any, State> {
 
       const context = new AudioContext();
       const input = context.createMediaStreamSource(stream)
-      this.processor = context.createScriptProcessor(1024,1,1);
+      this.processor = context.createScriptProcessor(4096,1,1);
   
       input.connect(this.processor);
       this.processor.connect(context.destination);
