@@ -126,7 +126,7 @@ export default App;
 
 function convertFloat32ArrayToInt16Array(float32Array: Float32Array) {
   const result = Int16Array.from(float32Array, num => {
-    return num * 0xFFFF;
+    return num * 0x7FFE;
   })
   return result;
 }
