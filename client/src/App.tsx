@@ -4,6 +4,7 @@ import './App.css';
 interface State {
   isOnAir: boolean;
   isConnected: boolean;
+  shouldConnect: boolean;
   isGettingUserMicData: boolean;
 }
 
@@ -20,19 +21,23 @@ class App extends Component<any, State> {
     this.state = {
       isOnAir: false,
       isConnected: false,
+      shouldConnect: false,
       isGettingUserMicData: false,
     }
 
     this.makeConnection = this.makeConnection.bind(this);
+    this.closeConnection = this.closeConnection.bind(this);
     this.getUserMicData = this.getUserMicData.bind(this);
     this.startBroadcast = this.startBroadcast.bind(this);
     this.stopBroadcast = this.stopBroadcast.bind(this);
     this.handleClick = this.handleClick.bind(this);
-
-    this.makeConnection();
   }
   
   makeConnection() {
+    this.setState({
+      shouldConnect: true,
+    });
+
     if(this.socket && this.socket.readyState !== 3) return;
 
     this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}`);
@@ -48,11 +53,24 @@ class App extends Component<any, State> {
       this.setState({
         isConnected: false,
       });
+
+      if(!this.state.shouldConnect) return;
+
       console.log('Disconnected, Try reconnect in 5sec');
       setTimeout(() => {
         this.makeConnection();
       }, 5000);
     }
+  }
+
+  closeConnection() {
+    this.setState({
+      shouldConnect: false,
+    });
+
+    if(!this.socket) return;
+
+    this.socket.close();
   }
 
   async getUserMicData() {
@@ -80,23 +98,33 @@ class App extends Component<any, State> {
   
   startBroadcast() {
     if(!this.processor) return;
+    
+    this.setState({
+      isOnAir: true,
+      shouldConnect: true,
+    });
+
+    this.makeConnection();
+    
     this.processor.onaudioprocess = e => {
       if(!this.socket) return;
       if(this.socket.readyState !== 1) return;
       const arrayBuffer = convertFloat32ArrayToInt16Array(e.inputBuffer.getChannelData(0));
       this.socket.send(arrayBuffer);
     };
-    this.setState({
-      isOnAir: true,
-    });
   }
   
   stopBroadcast() {
     if(!this.processor) return;
-    this.processor.onaudioprocess = () => {};
+
     this.setState({
       isOnAir: false,
+      shouldConnect: false,
     });
+
+    this.closeConnection();
+
+    this.processor.onaudioprocess = () => {};
   }
   
   async handleClick() {
