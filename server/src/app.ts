@@ -5,6 +5,7 @@ import Https from 'https';
 import WebSocket from 'ws';
 import Speaker from 'speaker';
 import Router from './router';
+import AmpPower from './ampPower';
 import redirectHttps from './redirectHttps';
 
 const httpServer = Http.createServer();
@@ -16,15 +17,23 @@ const httpsServer = Https.createServer({
 
 const webSocketServer = new WebSocket.Server({ server: httpsServer });
 webSocketServer.on('connection', ws => {
+  AmpPower.turnOn();
+
   const speaker = new Speaker({
     bitDepth: 16,
     channels: 1,
     sampleRate: 48000,
   });
   
-  ws.on('message', message => {
-    speaker.write(message);
-  })
+  ws.onmessage = message => {
+    speaker.write(message.data);
+  };
+
+  ws.onclose = () => {
+    if(webSocketServer.clients.size) return;
+    AmpPower.turnOff();
+  };
+
   console.log('connected');
 });
 

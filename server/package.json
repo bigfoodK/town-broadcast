@@ -24,10 +24,12 @@
     "@types/koa": "^2.0.48",
     "@types/koa-router": "^7.0.40",
     "@types/mime": "^2.0.1",
+    "@types/onoff": "^3.2.1",
     "@types/ws": "^6.0.1",
     "koa": "^2.7.0",
     "koa-router": "^7.4.0",
     "mime": "^2.4.0",
+    "onoff": "^4.1.0",
     "speaker": "^0.4.1",
     "typescript": "^3.3.3333",
     "ws": "^6.2.0"
