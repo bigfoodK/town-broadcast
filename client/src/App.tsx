@@ -148,7 +148,7 @@ class App extends Component<any, State> {
           <button 
             className = {`mic-button ${this.state.isOnAir ? 'on' : 'off'}`}
             onClick = {this.handleClick}>
-              ㅇ
+              <i className = "fas fa-microphone" />
           </button>  
         </div>
       </div>
