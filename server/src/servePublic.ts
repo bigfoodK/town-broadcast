@@ -2,8 +2,9 @@ import Fs from 'fs';
 import Koa from 'koa';
 import Path from 'path';
 import Mime from 'mime';
+import ServerConfig from './serverConfig';
 
-const rootDir = '../client/build'
+const rootDir = ServerConfig.publicRoot;
 
 export default async function servePublic(ctx: Koa.Context, next: () => Promise<any>) {
   const normalizedPath = Path.normalize(ctx.params.path || '/');

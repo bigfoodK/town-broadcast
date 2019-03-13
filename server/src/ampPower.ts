@@ -1,6 +1,7 @@
 import Onoff from 'onoff';
+import ServerConfig from './serverConfig';
 
-const powerPin = 26;
+const powerPin = ServerConfig.amp.pin;
 
 function getGpio() {
   try {

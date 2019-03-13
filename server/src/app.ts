@@ -4,6 +4,7 @@ import Http from 'http';
 import Https from 'https';
 import WebSocket from 'ws';
 import Speaker from 'speaker';
+import ServerConfig from './serverConfig';
 import Router from './router';
 import AmpPower from './ampPower';
 import redirectHttps from './redirectHttps';
@@ -11,8 +12,8 @@ import redirectHttps from './redirectHttps';
 const httpServer = Http.createServer();
 
 const httpsServer = Https.createServer({
-  key: Fs.readFileSync('./key/key.pem'),
-  cert: Fs.readFileSync('./key/cert.pem'),
+  key: Fs.readFileSync(ServerConfig.https.keyPath),
+  cert: Fs.readFileSync(ServerConfig.https.certPath),
 });
 
 const webSocketServer = new WebSocket.Server({ server: httpsServer });
@@ -42,6 +43,11 @@ app.use(redirectHttps);
 app.use(Router.routes());
 
 httpServer.on('request', app.callback());
-httpServer.listen(3000);
+httpServer.listen(ServerConfig.http.port, undefined, undefined, () => {
+  console.log(`http server running on ${ServerConfig.http.port}`);
+});
+
 httpsServer.on('request', app.callback());
-httpsServer.listen(3001);
+httpsServer.listen(ServerConfig.https.port, undefined, undefined, () => {
+  console.log(`https server running on ${ServerConfig.https.port}`);
+});

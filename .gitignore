@@ -66,3 +66,6 @@ server/dist/
 
 # ssl key
 server/key/*
+
+# server config
+server/serverConfig.json
