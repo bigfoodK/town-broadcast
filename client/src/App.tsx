@@ -137,14 +137,20 @@ class App extends Component<any, State> {
   render() {
     return (
       <div className="App">
-      <h1>{this.state.isConnected ? 'Connected' : 'Disconnected'} to server</h1>
-      <h1>{this.state.isGettingUserMicData ? 'using' : 'not using'} mic</h1>
-      <h1>{this.state.isOnAir ? 'onAir': 'ready'}</h1>
-        <button 
-          className = 'mic-button'
-          onClick = {this.handleClick}>
-          {this.state.isOnAir ? 'stop broadcast' : 'start broadcast'}
-        </button>
+        <div className = 'state-bar'>
+          <div className = 'state-item'>서버</div>
+          <div className = { `state-item led ${this.state.isConnected ? 'on' : 'off'}` } />
+          <div className = 'state-item' />
+          <div className = 'state-item'>마이크</div>
+          <div className = { `state-item led ${this.state.isGettingUserMicData ? 'on' : 'off'}` } />
+        </div>
+        <div className = 'container'>
+          <button 
+            className = {`mic-button ${this.state.isOnAir ? 'on' : 'off'}`}
+            onClick = {this.handleClick}>
+              ㅇ
+          </button>  
+        </div>
       </div>
     );
   }
