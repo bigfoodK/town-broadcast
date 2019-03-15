@@ -40,7 +40,7 @@ class App extends Component<any, State> {
 
     if(this.socket && this.socket.readyState !== 3) return;
 
-    this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}`);
+    this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/voice`);
     this.socket.onerror = error => {
       console.error(error);
     }
