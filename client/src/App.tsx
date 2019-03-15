@@ -34,10 +34,6 @@ class App extends Component<any, State> {
   }
   
   makeConnection() {
-    this.setState({
-      shouldConnect: true,
-    });
-
     if(this.socket && this.socket.readyState !== 3) return;
 
     this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/voice`);
@@ -70,12 +66,7 @@ class App extends Component<any, State> {
   }
 
   closeConnection() {
-    this.setState({
-      shouldConnect: false,
-    });
-
     if(!this.socket) return;
-
     this.socket.close();
   }
 
