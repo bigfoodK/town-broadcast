@@ -61,6 +61,12 @@ class App extends Component<any, State> {
         this.makeConnection();
       }, 5000);
     }
+    this.socket.onmessage = message => {
+      if(message.data === 'Other device connected') {
+        alert("다른 기기에서 연결되었습니다.\n방송을 종료합니다.");
+        this.stopBroadcast();
+      }
+    };
   }
 
   closeConnection() {

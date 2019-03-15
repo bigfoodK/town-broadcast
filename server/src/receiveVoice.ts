@@ -4,6 +4,12 @@ import Crypto from 'crypto';
 import Speaker from 'speaker';
 import AmpPower from './ampPower';
 
+const speaker = new Speaker({
+  bitDepth: 16,
+  channels: 1,
+  sampleRate: 48000,
+});
+
 const clients: Set<WebSocket> = new Set();
 
 const keyRegex = /^[+/0-9A-Za-z]{22}==$/;
@@ -46,24 +52,18 @@ function doUpgrade(ctx: Koa.Context, key: string) {
   
   const websocket = new WebSocket(null);
   // TODO: Have to figure out what the second parameter is
-  websocket.setSocket(ctx.socket, new Buffer(''));
+  websocket.setSocket(ctx.socket, Buffer.alloc(0));
   websocket.on('close', () => {
     clients.delete(websocket);
   });
 
+  if(clients.size > 0) disconnectAll();
   handleData(websocket);
-
   clients.add(websocket);
 }
 
 function handleData(websocket: WebSocket) {
   AmpPower.turnOn();
-
-  const speaker = new Speaker({
-    bitDepth: 16,
-    channels: 1,
-    sampleRate: 48000,
-  });
   
   websocket.onmessage = message => {
     speaker.write(message.data);
@@ -75,4 +75,11 @@ function handleData(websocket: WebSocket) {
   };
 
   console.log('connected');
+}
+
+function disconnectAll() {
+  clients.forEach(websocket => {
+    websocket.send('Other device connected');
+    websocket.close();
+  });
 }
