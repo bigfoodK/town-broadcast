@@ -1,7 +1,15 @@
 import Fs from 'fs';
+import Crypto from 'crypto';
 
 interface ServerConfig {
   publicRoot: string,
+  auth: {
+    sessionKey: string,
+    repeatTime: number,
+    expiresIn: number,
+    password: string,
+    salt: string,
+  },
   http: {
     port: number,
   },
@@ -17,6 +25,13 @@ interface ServerConfig {
 
 const defaultConfig: ServerConfig = {
   publicRoot: '../client/build',
+  auth: {
+    sessionKey: getRandomString(64),
+    repeatTime: 65536,
+    expiresIn: 1000 * 60 * 60 * 24 * 60,
+    password: getRandomHash(),
+    salt: getRandomString(64),
+  },
   http: {
     port: 3000,
   },
@@ -87,6 +102,21 @@ function getConfigFile(): ServerConfig {
     makeConfigFile();
     return defaultConfig;
   }
+}
+
+function getRandomString(length: number) {
+  const availableCharacter = "`1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:ZXCVBNM<>?";
+  let string = '';
+  for(let i = 0; i < length; i++) {
+    string += availableCharacter[Math.floor(Math.random() * availableCharacter.length)];
+  }
+  return string;
+}
+
+function getRandomHash() {
+  return Crypto.createHash('SHA256')
+    .update(getRandomString(16))
+    .digest('base64');
 }
 
 export = getConfigFile();

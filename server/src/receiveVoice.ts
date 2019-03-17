@@ -51,15 +51,25 @@ function doUpgrade(ctx: Koa.Context, key: string) {
   ctx.set('Sec-WebSocket-Accept', digest);
   
   const websocket = new WebSocket(null);
+ 
+  if(ctx.login) {
+    websocket.onclose = () => {
+      clients.delete(websocket);
+    }
+  
+    if(clients.size > 0) disconnectAll();
+    handleData(websocket);
+    clients.add(websocket);
+  } else {
+    websocket.onopen = () => {
+      console.log('unauthed');
+      setTimeout(() => {
+        websocket.close(4401, 'Unauthorized');
+      }, 400);
+    }
+  }
   // TODO: Have to figure out what the second parameter is
   websocket.setSocket(ctx.socket, Buffer.alloc(0));
-  websocket.on('close', () => {
-    clients.delete(websocket);
-  });
-
-  if(clients.size > 0) disconnectAll();
-  handleData(websocket);
-  clients.add(websocket);
 }
 
 function handleData(websocket: WebSocket) {
@@ -79,7 +89,6 @@ function handleData(websocket: WebSocket) {
 
 function disconnectAll() {
   clients.forEach(websocket => {
-    websocket.send('Other device connected');
-    websocket.close();
+    websocket.close(4409, 'Other device connected');
   });
 }

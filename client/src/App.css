@@ -1,6 +1,9 @@
 .App {
   position: relative;
   text-align: center;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 .on {
@@ -46,4 +49,34 @@
   font-size: 25vmin;
   color: #EEE;
   transition: background-color ease-in-out 0.1s
+}
+
+.login-box {
+  position: absolute;
+  left: 100%;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  background-color: #444;
+  transform: translatex(-100%);
+  transition: transform cubic-bezier(0.215, 0.610, 0.355, 1) 1.5s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loggedIn {
+  transform: translatex(0px);
+}
+
+.form-item {
+  margin: 0.2em;
+  border: 0px;
+  padding: 0px 1em;
+  height: 3em;
+  font-size: 1em;
+  color: #EEE;
+  font-weight: bold;
+  vertical-align: middle;
+  background-color: #666;
 }

@@ -3,9 +3,11 @@ import './App.css';
 
 interface State {
   isOnAir: boolean;
+  isLoggedIn: boolean;
   isConnected: boolean;
   shouldConnect: boolean;
   isGettingUserMicData: boolean;
+  password: string;
 }
 
 class App extends Component<any, State> {
@@ -20,9 +22,11 @@ class App extends Component<any, State> {
 
     this.state = {
       isOnAir: false,
+      isLoggedIn: false,
       isConnected: false,
       shouldConnect: false,
       isGettingUserMicData: false,
+      password: '',
     }
 
     this.makeConnection = this.makeConnection.bind(this);
@@ -31,6 +35,21 @@ class App extends Component<any, State> {
     this.startBroadcast = this.startBroadcast.bind(this);
     this.stopBroadcast = this.stopBroadcast.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.handlePasswordChange = this.handlePasswordChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  componentWillMount() {
+    this.checkLogin();
+  }
+
+  checkLogin() {
+    const isLoggedIn = parseCookie(document.cookie).has('session');
+    if(this.state.isLoggedIn === isLoggedIn) return;
+    this.setState({
+      isLoggedIn: isLoggedIn,
+    });
+    return isLoggedIn;
   }
   
   makeConnection() {
@@ -45,10 +64,25 @@ class App extends Component<any, State> {
         isConnected: true,
       });
     }
-    this.socket.onclose = () => {
+    this.socket.onclose = event => {
       this.setState({
         isConnected: false,
       });
+
+      switch (event.code) {
+        case 4401:
+          this.setState({
+            isLoggedIn: false,
+          });
+          this.stopBroadcast();
+          alert("로그인이 필요합니다.");
+          break;
+          
+        case 4409:
+          this.stopBroadcast();
+          alert("다른 기기에서 연결되었습니다.\n방송을 종료합니다.");
+          break;
+      }
 
       if(!this.state.shouldConnect) return;
 
@@ -57,12 +91,6 @@ class App extends Component<any, State> {
         this.makeConnection();
       }, 5000);
     }
-    this.socket.onmessage = message => {
-      if(message.data === 'Other device connected') {
-        alert("다른 기기에서 연결되었습니다.\n방송을 종료합니다.");
-        this.stopBroadcast();
-      }
-    };
   }
 
   closeConnection() {
@@ -130,10 +158,47 @@ class App extends Component<any, State> {
       ? this.stopBroadcast()
       : this.startBroadcast()
   }
+
+  handlePasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({
+      password: event.target.value,
+    });
+  } 
+
+  handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const data = new FormData(event.target as HTMLFormElement);
+
+    fetch('/login', {
+      body: data,
+      method: 'POST',
+      credentials: 'same-origin',
+    }).then(() => {
+      this.checkLogin()
+        ? alert('로그인 되었습니다.')
+        : alert('잘못된 비밀번호입니다.');
+    })
+
+    event.preventDefault();
+  }
   
   render() {
     return (
       <div className="App">
+        <div className = {`login-box ${this.state.isLoggedIn ? 'loggedIn' : ''}`}>
+          <form onSubmit = { this.handleSubmit }>
+            <input 
+              className = 'form-item'
+              id = 'password'
+              name = 'password'
+              type = 'password'
+              value = { this.state.password }
+              onChange = { this.handlePasswordChange } />
+            <input
+              className = 'form-item'
+              type = 'submit'
+              value = '로그인' />
+          </form>
+        </div>
         <div className = 'state-bar'>
           <div className = 'state-item'>서버</div>
           <div className = { `state-item led ${this.state.isConnected ? 'on' : 'off'}` } />
@@ -159,5 +224,16 @@ function convertFloat32ArrayToInt16Array(float32Array: Float32Array) {
   const result = Int16Array.from(float32Array, num => {
     return num * 0x7FFE;
   })
+  return result;
+}
+
+function parseCookie(cookie: string) {
+  const result = new Map<String, String>();
+  cookie.split(';').forEach(row => {
+    const index = row.indexOf('=');
+    const key = row.slice(0, index).trim();
+    const value = row.slice(index+1).trim();
+    result.set(key, value);
+  });
   return result;
 }

@@ -2,9 +2,11 @@ import Fs from 'fs';
 import Koa from 'koa';
 import Http from 'http';
 import Https from 'https';
+import BodyParser from 'koa-body';
 import ServerConfig from './serverConfig';
 import Router from './router';
 import redirectHttps from './redirectHttps';
+import authenticate from './authenticate';
 
 const httpServer = Http.createServer();
 
@@ -15,6 +17,10 @@ const httpsServer = Https.createServer({
 
 const app = new Koa();
 app.use(redirectHttps);
+app.use(BodyParser({
+  multipart: true,
+}));
+app.use(authenticate);
 app.use(Router.routes());
 
 httpServer.on('request', app.callback());
