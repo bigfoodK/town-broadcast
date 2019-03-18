@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Alarm from './Alarm';
 import './App.css';
 
 interface State {
@@ -13,12 +14,14 @@ interface State {
 class App extends Component<any, State> {
   socket: WebSocket | null;
   processor: ScriptProcessorNode | null;
+  alarm: Alarm | null;
 
   constructor(prop: any) {
     super(prop);
 
     this.socket = null;
     this.processor = null;
+    this.alarm = null;
 
     this.state = {
       isOnAir: false,
@@ -29,6 +32,7 @@ class App extends Component<any, State> {
       password: '',
     }
 
+    this.makeAlarm = this.makeAlarm.bind(this);
     this.makeConnection = this.makeConnection.bind(this);
     this.closeConnection = this.closeConnection.bind(this);
     this.getUserMicData = this.getUserMicData.bind(this);
@@ -41,6 +45,29 @@ class App extends Component<any, State> {
 
   componentWillMount() {
     this.checkLogin();
+  }
+
+  makeAlarm(option?: {
+    text?: string,
+    type?: 'info' | 'success' | 'warning' | 'error',
+    waiting?: boolean,
+    duration?: number,
+  }) {
+    if(!this.alarm) return () => {};
+    if(!option) option = {};
+    if(!option.text) option.text = '';
+    if(!option.type) option.type = 'info';
+    if(!option.waiting) option.waiting = false;
+    if(!option.duration) option.duration = 5000;
+
+    const destroyFunction = this.alarm.makeAlarm({
+      text: option.text,
+      type: option.type,
+      waiting: option.waiting,
+      duration: option.duration,
+    })
+
+    return destroyFunction;
   }
 
   checkLogin() {
@@ -75,20 +102,26 @@ class App extends Component<any, State> {
             isLoggedIn: false,
           });
           this.stopBroadcast();
-          alert("로그인이 필요합니다.");
+          this.makeAlarm({ text: '로그인이 필요합니다', type: 'error' })
           break;
           
         case 4409:
           this.stopBroadcast();
-          alert("다른 기기에서 연결되었습니다.\n방송을 종료합니다.");
+          this.makeAlarm({ text: '다른 기기에서 연결되었습니다. 방송을 종료합니다' })
           break;
       }
 
       if(!this.state.shouldConnect) return;
 
-      console.log('Disconnected, Try reconnect in 5sec');
+      const destroyFunction = this.makeAlarm({
+        text: '연결이 끊겼습니다. 5초 후에 다시 연결합니다',
+        type: 'warning',
+        waiting: true,
+      });
+
       setTimeout(() => {
         this.makeConnection();
+        destroyFunction();
       }, 5000);
     }
   }
@@ -117,11 +150,12 @@ class App extends Component<any, State> {
       })
     } catch (error) {
       console.error(error);
-      alert(error);
+      this.makeAlarm({ text: '마이크 데이터를 가져오는데 실패했습니다', type: 'error' });
     }
   }
   
   startBroadcast() {
+    this.makeAlarm({ text: '방송을 시작합니다' });
     if(!this.processor) return;
     
     this.setState({
@@ -140,6 +174,7 @@ class App extends Component<any, State> {
   }
   
   stopBroadcast() {
+    this.makeAlarm({ text: '방송을 종료합니다' });
     if(!this.processor) return;
 
     this.setState({
@@ -174,8 +209,8 @@ class App extends Component<any, State> {
       credentials: 'same-origin',
     }).then(() => {
       this.checkLogin()
-        ? alert('로그인 되었습니다.')
-        : alert('잘못된 비밀번호입니다.');
+        ? this.makeAlarm({ text: '로그인에 성공했습니다', type: 'success' })
+        : this.makeAlarm({ text: '로그인에 실패했습니다', type: 'error' })
     })
 
     event.preventDefault();
@@ -184,6 +219,7 @@ class App extends Component<any, State> {
   render() {
     return (
       <div className="App">
+        <Alarm ref = { ref => this.alarm = ref }/>
         <div className = {`login-box ${this.state.isLoggedIn ? 'loggedIn' : ''}`}>
           <form onSubmit = { this.handleSubmit }>
             <input 
