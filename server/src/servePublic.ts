@@ -26,14 +26,16 @@ export default async function servePublic(ctx: Koa.Context, next: () => Promise<
   sendFile(ctx, filePath, stat.size, false);
 }
 
-async function getFileStatAsync(path: string) {
-  try {
-    const stats = await Fs.promises.stat(path);
-    return stats;
-  } catch (e) {
-    if(e.code === 'ENOENT') return false;
-    throw e;
-  }
+function getFileStatAsync(path: string): Promise<Fs.Stats | false> {
+  return new Promise((resolve, reject) => {
+    Fs.stat(path, (error, stats) => {
+      if(error) {
+        if(error.code === 'ENOENT') resolve(false);
+        reject(error);
+      }
+      resolve(stats);
+    })
+  });
 }
 
 function sendFile(ctx: Koa.Context, filePath: string, size: number, isDownload: boolean) {
