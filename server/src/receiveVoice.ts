@@ -53,19 +53,19 @@ function doUpgrade(ctx: Koa.Context, key: string) {
   const websocket = new WebSocket(null);
  
   if(ctx.login) {
-    websocket.onclose = () => {
+    websocket.on('close', () => {
       clients.delete(websocket);
-    }
+    });
   
     if(clients.size > 0) disconnectAll();
     handleData(websocket);
     clients.add(websocket);
   } else {
-    websocket.onopen = () => {
+    websocket.on('open', () => {
       setTimeout(() => {
         websocket.close(4401, 'Unauthorized');
       }, 400);
-    }
+    });
   }
   // TODO: Have to figure out what the second parameter is
   websocket.setSocket(ctx.socket, Buffer.alloc(0));
@@ -74,14 +74,14 @@ function doUpgrade(ctx: Koa.Context, key: string) {
 function handleData(websocket: WebSocket) {
   AmpPower.turnOn();
   
-  websocket.onmessage = message => {
-    speaker.write(message.data);
-  };
+  websocket.on('message', message => {
+    speaker.write(message);
+  });
 
-  websocket.onclose = () => {
+  websocket.on('close', () => {
     if(clients.size > 0) return;
     AmpPower.turnOff();
-  };
+  });
 }
 
 function disconnectAll() {
