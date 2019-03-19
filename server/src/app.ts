@@ -7,6 +7,7 @@ import ServerConfig from './serverConfig';
 import Router from './router';
 import redirectHttps from './redirectHttps';
 import authenticate from './authenticate';
+import Logger from './logger';
 
 const httpServer = Http.createServer();
 
@@ -16,6 +17,7 @@ const httpsServer = Https.createServer({
 });
 
 const app = new Koa();
+app.use(Logger);
 app.use(redirectHttps);
 app.use(BodyParser({
   multipart: true,

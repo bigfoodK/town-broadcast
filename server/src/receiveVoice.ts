@@ -62,7 +62,6 @@ function doUpgrade(ctx: Koa.Context, key: string) {
     clients.add(websocket);
   } else {
     websocket.onopen = () => {
-      console.log('unauthed');
       setTimeout(() => {
         websocket.close(4401, 'Unauthorized');
       }, 400);
@@ -83,8 +82,6 @@ function handleData(websocket: WebSocket) {
     if(clients.size > 0) return;
     AmpPower.turnOff();
   };
-
-  console.log('connected');
 }
 
 function disconnectAll() {
