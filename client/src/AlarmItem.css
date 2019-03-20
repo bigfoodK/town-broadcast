@@ -1,0 +1,53 @@
+.alarm-item {
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #FFF;
+  font-weight: bold;
+  user-select: none;
+  width: 90%;
+  padding: 0ex 0em;
+  margin-top: 0ex;
+  height: 0ex;
+  opacity: 0;
+  transition: all cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s;
+}
+
+.alarm-item.show {
+  width: 100%;
+  padding: 0.5ex 0.5em;
+  margin-top: 0.5ex;
+  height: 3ex;
+  opacity: 1;
+}
+
+@keyframes alarm-wait-animation {
+	from {
+		transform: translateX(0);
+	}
+	to { 
+		transform: translateX(46px);
+	}
+}
+
+.alarm-wait{
+  z-index: 0;
+  overflow: hidden;
+  position: absolute;
+  left: -46px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -55deg,
+    rgba(0, 0, 0, 0) 1px,
+    rgba(255, 255, 255, 0.2) 2px,
+    rgba(255, 255, 255, 0.2) 11px,
+    rgba(0, 0, 0, 0) 12px,
+    rgba(0, 0, 0, 0) 20px
+	);
+  animation-name: alarm-wait-animation;
+	animation-duration: .6s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}

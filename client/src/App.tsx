@@ -54,18 +54,8 @@ class App extends Component<any, State> {
     duration?: number,
   }) {
     if(!this.alarm) return () => {};
-    if(!option) option = {};
-    if(!option.text) option.text = '';
-    if(!option.type) option.type = 'info';
-    if(!option.waiting) option.waiting = false;
-    if(!option.duration) option.duration = 5000;
 
-    const destroyFunction = this.alarm.makeAlarm({
-      text: option.text,
-      type: option.type,
-      waiting: option.waiting,
-      duration: option.duration,
-    })
+    const destroyFunction = this.alarm.makeAlarm(option)
 
     return destroyFunction;
   }
@@ -87,6 +77,7 @@ class App extends Component<any, State> {
       console.error(error);
     }
     this.socket.onopen = () => {
+      this.makeAlarm({ text: '서버에 연결되었습니다', type: 'success' });
       this.setState({
         isConnected: true,
       });
@@ -97,6 +88,10 @@ class App extends Component<any, State> {
       });
 
       switch (event.code) {
+        case 1000:
+        this.makeAlarm({ text: '서버와의 연결이 종료되었습니다' })
+        break;
+
         case 4401:
           this.setState({
             isLoggedIn: false,
@@ -107,31 +102,39 @@ class App extends Component<any, State> {
           
         case 4409:
           this.stopBroadcast();
-          this.makeAlarm({ text: '다른 기기에서 연결되었습니다. 방송을 종료합니다' })
+          this.makeAlarm({ text: '다른 기기에서 연결되었습니다. 방송을 종료합니다', type: 'warning' })
           break;
+
+        default:
+          this.makeAlarm({ text: '알 수 없는 에러로 연결이 종료되었습니다', type: 'error' });
       }
 
       if(!this.state.shouldConnect) return;
 
-      const destroyFunction = this.makeAlarm({
-        text: '연결이 끊겼습니다. 5초 후에 다시 연결합니다',
+      this.makeAlarm({
+        text: '5초 후에 다시 연결합니다',
         type: 'warning',
         waiting: true,
+        duration: 5000,
       });
 
       setTimeout(() => {
         this.makeConnection();
-        destroyFunction();
       }, 5000);
     }
   }
 
   closeConnection() {
     if(!this.socket) return;
-    this.socket.close();
+    this.socket.close(1000);
   }
 
   async getUserMicData() {
+    const destroyAlarm = this.makeAlarm({
+      text: '마이크 데이터를 가져오는 중입니다',
+      waiting: true,
+    });
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -148,10 +151,14 @@ class App extends Component<any, State> {
       this.setState({
         isGettingUserMicData: true,
       })
+      
+      this.makeAlarm({ text: '마이크 데이터를 가져왔습니다', type: 'success' });
     } catch (error) {
       console.error(error);
       this.makeAlarm({ text: '마이크 데이터를 가져오는데 실패했습니다', type: 'error' });
     }
+
+    destroyAlarm();
   }
   
   startBroadcast() {
@@ -203,11 +210,17 @@ class App extends Component<any, State> {
   handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     const data = new FormData(event.target as HTMLFormElement);
 
+    const destroyAlarm = this.makeAlarm({
+      text: '로그인중입니다',
+      waiting: true,
+    });
+
     fetch('/login', {
       body: data,
       method: 'POST',
       credentials: 'same-origin',
     }).then(() => {
+      destroyAlarm();
       this.checkLogin()
         ? this.makeAlarm({ text: '로그인에 성공했습니다', type: 'success' })
         : this.makeAlarm({ text: '로그인에 실패했습니다', type: 'error' })
