@@ -48,7 +48,7 @@ const defaultConfig: ServerConfig = {
 function checkConfigFile(piece: any, defaultPiece: any) {
   let resultPiece: any;
 
-  if (typeof defaultPiece === 'object') {
+  if ((typeof defaultPiece === 'object') && !(defaultPiece instanceof Array)) {
     resultPiece = {};
     Object.keys(defaultPiece).forEach(key => {
       resultPiece[key] = (typeof piece[key] === 'undefined')
