@@ -1,14 +1,25 @@
+import Os from 'os';
 import Fs from 'fs';
+import Path from 'path';
 import Crypto from 'crypto';
 
 interface ServerConfig {
   publicRoot: string,
+  debug: boolean,
   auth: {
     sessionKey: string,
     repeatTime: number,
     expiresIn: number,
     password: string,
     salt: string,
+  },
+  greenlock: {
+    version: string,
+    server: string,
+    email: string,
+    agreeTos: boolean,
+    approveDomains: string[],
+    configDir: string,
   },
   http: {
     port: number,
@@ -25,12 +36,23 @@ interface ServerConfig {
 
 const defaultConfig: ServerConfig = {
   publicRoot: '../client/build',
+  debug: false,
   auth: {
     sessionKey: getRandomString(64),
     repeatTime: 65536,
     expiresIn: 1000 * 60 * 60 * 24 * 60,
     password: getRandomHash(),
     salt: getRandomString(64),
+  },
+  greenlock: {
+    version: 'v02',
+    server: 'https://acme-v02.api.letsencrypt.org/directory',
+    email: 'hongGildong@example.com',
+    agreeTos: true,
+    approveDomains: [
+      'example.com',
+    ],
+    configDir: Path.join(Os.homedir(), '/acme/etc'),
   },
   http: {
     port: 3000,

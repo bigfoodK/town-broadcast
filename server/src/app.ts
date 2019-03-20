@@ -3,18 +3,14 @@ import Koa from 'koa';
 import Http from 'http';
 import Https from 'https';
 import BodyParser from 'koa-body';
+import Greenlock from 'greenlock-koa';
 import ServerConfig from './serverConfig';
 import Router from './router';
 import redirectHttps from './redirectHttps';
 import authenticate from './authenticate';
 import Logger from './logger';
 
-const httpServer = Http.createServer();
-
-const httpsServer = Https.createServer({
-  key: Fs.readFileSync(ServerConfig.https.keyPath),
-  cert: Fs.readFileSync(ServerConfig.https.certPath),
-});
+const greenlock = Greenlock.create(ServerConfig.greenlock);
 
 const app = new Koa();
 app.use(Logger);
@@ -25,12 +21,23 @@ app.use(BodyParser({
 app.use(authenticate);
 app.use(Router.routes());
 
-httpServer.on('request', app.callback());
+const httpServer = ServerConfig.debug
+  ? Http.createServer(app.callback())
+  : Http.createServer(greenlock.middleware(app.callback()));
+
+const httpsServer = ServerConfig.debug
+  ? Https.createServer({
+      key: Fs.readFileSync(ServerConfig.https.keyPath),
+      cert: Fs.readFileSync(ServerConfig.https.certPath),
+    }, app.callback())
+  : Https.createServer(greenlock.tlsOptions, greenlock.middleware(app.callback()));
+
 httpServer.listen(ServerConfig.http.port, undefined, undefined, () => {
-  console.log(`http server running on ${ServerConfig.http.port}`);
+  const date = new Date();
+  console.log(`http server running on ${ServerConfig.http.port} [${date.toLocaleString()}]`);
 });
 
-httpsServer.on('request', app.callback());
 httpsServer.listen(ServerConfig.https.port, undefined, undefined, () => {
-  console.log(`https server running on ${ServerConfig.https.port}`);
+  const date = new Date();
+  console.log(`https server running on ${ServerConfig.https.port} [${date.toLocaleString()}]`);
 });
