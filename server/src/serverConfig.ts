@@ -55,10 +55,10 @@ const defaultConfig: ServerConfig = {
     configDir: Path.join(Os.homedir(), '/acme/etc'),
   },
   http: {
-    port: 3000,
+    port: 80,
   },
   https: {
-    port: 3001,
+    port: 443,
     keyPath: './key/key.pem',
     certPath: './key/cert.pem',
   },

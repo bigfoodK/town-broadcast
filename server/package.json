@@ -9,6 +9,7 @@
     "build": "tsc",
     "build-watch": "tsc --watch",
     "set-password": "node ./dist/setPassword.js",
+    "set-config": "node ./dist/setConfig.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
